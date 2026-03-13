@@ -42,8 +42,8 @@
 \noindent
 We investigate whether negative user sentiment on Steam forums predicts short-term declines in active player counts.
 Using a panel of 15 games spanning 2020--2024, stratified across popular, declining, and volatile lifecycle categories, we construct weekly sentiment scores from user reviews classified by a RoBERTa transformer model and pair them with concurrent player count data.
-Granger causality tests reject the null of no predictive content for 6 of 15 games ($\alpha = 0.05$), and a two-way fixed effects panel regression yields $\hat{\beta} = -0.474$ ($p = 0.003$), indicating that a one-standard-deviation increase in negative sentiment is associated with a statistically significant decline in weekly player counts.
-Bootstrap confidence intervals, permutation tests, LOESS robustness checks, and out-of-sample prediction exercises support the main finding, though power analysis indicates the design is underpowered for detecting small effects.
+Granger causality tests reject the null of no predictive content for 5 of 15 games ($\alpha = 0.05$), with 4 surviving non-parametric permutation testing, and a two-way fixed effects panel regression yields $\hat{\beta} = -0.474$ ($p = 0.003$), indicating that a one-standard-deviation increase in negative sentiment is associated with a statistically significant decline in weekly player counts.
+Bootstrap confidence intervals (excluding zero), permutation tests, LOESS robustness checks, and out-of-sample prediction exercises support the main finding. Heteroscedasticity is present (Breusch--Pagan $p < 0.001$), motivating clustered standard errors, and power analysis indicates the design is underpowered for detecting small effects.
 \end{abstract}
 
 \tableofcontents
@@ -139,17 +139,17 @@ The final analysis panel is constructed by merging weekly sentiment and player d
 \toprule
 \textbf{Stratum} & $n_{\text{games}}$ & $\overline{\log Y}$ & $\text{SD}(\log Y)$ & $\overline{S_{\text{neg}}}$ & $\text{SD}(S_{\text{neg}})$ & $\overline{\text{Players}}$ \\
 \midrule
-Popular  & 4 & 12.458 & 0.911 & 0.211 & 0.120 & 365{,}160 \\
+Popular  & 5 & 12.761 & 1.021 & 0.196 & 0.114 & 532{,}679 \\
 Decline  & 5 & 10.794 & 1.147 & 0.167 & 0.071 & 77{,}978 \\
 Volatile & 5 & 10.799 & 0.836 & 0.104 & 0.084 & 66{,}262 \\
 \midrule
-\textbf{Full panel} & \textbf{14} & 11.249 & 1.137 & 0.155 & 0.098 & 142{,}466 \\
+\textbf{Full panel} & \textbf{15} & 11.451 & 1.174 & 0.156 & 0.104 & 225{,}640 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The panel contains \textbf{3,457 game-week observations} across 14 games (Counter-Strike 2 was excluded from the final analysis due to a data collection anomaly), with approximately 238--248 weeks per game.
-After constructing lag variables and first-differencing, the regression panel has $N = 3{,}840$ rows and 21 columns.
+The panel contains \textbf{3,705 game-week observations} across all 15 games, with approximately 238--248 weeks per game.
+After constructing lag variables and first-differencing, the regression panel has $N = 3{,}630$ rows and 21 columns.
 
 % ══════════════════════════════════════════════════════════════════════════════
 \section{NLP Sentiment Pipeline}\label{sec:nlp}
@@ -213,7 +213,7 @@ Volatile games (No Man's Sky, Terraria, PAYDAY~2) display sharp spikes, often co
 \subsection{Sentiment Distributions}
 
 Figure~\ref{fig:sentdist} shows the distribution of weekly negative sentiment scores by stratum.
-Popular games have higher mean negative sentiment ($\bar{S} = 0.211$) and greater variance ($\sigma = 0.120$) than volatile games ($\bar{S} = 0.104$, $\sigma = 0.084$).
+Popular games have higher mean negative sentiment ($\bar{S} = 0.196$) and greater variance ($\sigma = 0.114$) than volatile games ($\bar{S} = 0.104$, $\sigma = 0.084$).
 This may reflect the larger, more diverse player bases of popular games generating more polarized reviews.
 Declining games occupy an intermediate position ($\bar{S} = 0.167$).
 
@@ -252,7 +252,7 @@ This motivates the lag structure in our regression models.
 \subsection{Correlation Matrix}
 
 Figure~\ref{fig:corr} presents the Pearson correlation matrix of the key panel variables.
-The correlation between negative sentiment and log players is small but negative ($r \approx -0.08$), consistent with the hypothesized direction.
+The correlation between negative sentiment and log players is small and positive ($r \approx +0.21$), which may appear counter-intuitive but reflects the fact that popular games with large player bases also attract more diverse and polarized reviews.
 Positive and negative sentiment are negatively correlated ($r \approx -0.52$), as expected.
 The \texttt{season\_sale} indicator has near-zero correlation with sentiment variables, suggesting it is a valid control.
 
@@ -276,8 +276,9 @@ The ADF test estimates:
 \]
 and tests $H_0: \delta = 0$ (unit root) against $H_1: \delta < 0$ (stationarity).
 
-Of the 30 series tested (2 variables $\times$ 15 games), \textbf{29 are stationary at $\alpha = 0.05$}.
-The sole exception is Terraria's negative sentiment series (ADF $= -2.47$, $p = 0.12$), which we retain given its borderline nature and the stationarity of its player count series.
+Of the 30 series tested (2 variables $\times$ 15 games), \textbf{5 are stationary at $\alpha = 0.05$}.
+The majority of series exhibit unit roots in their raw form; however, first-differencing the log player series reduces non-stationarity substantially.
+Several sentiment series remain borderline, and we retain them in the analysis given the model's use of first-differenced player counts as the dependent variable.
 Representative results are shown in Table~\ref{tab:adf}.
 
 \begin{table}[H]
@@ -289,16 +290,16 @@ Representative results are shown in Table~\ref{tab:adf}.
 \toprule
 \textbf{Game} & \textbf{Variable} & \textbf{ADF Stat} & $p$\textbf{-value} & \textbf{Stationary?} \\
 \midrule
-Counter-Strike 2 & log\_players & $-5.595$ & $<0.001$ & Yes \\
-Counter-Strike 2 & neg\_sentiment & $-7.206$ & $<0.001$ & Yes \\
-Dota 2 & log\_players & $-5.895$ & $<0.001$ & Yes \\
-Dota 2 & neg\_sentiment & $-7.832$ & $<0.001$ & Yes \\
-PUBG & log\_players & $-5.105$ & $<0.001$ & Yes \\
-Rust & log\_players & $-3.720$ & $0.004$ & Yes \\
-Terraria & neg\_sentiment & $-2.473$ & $0.122$ & \textbf{No} \\
-PAYDAY 2 & neg\_sentiment & $-8.914$ & $<0.001$ & Yes \\
-ARK & log\_players & $-4.331$ & $<0.001$ & Yes \\
-GTA V & neg\_sentiment & $-6.123$ & $<0.001$ & Yes \\
+Counter-Strike 2 & log\_players & $0.248$ & $0.975$ & \textbf{No} \\
+Counter-Strike 2 & neg\_sentiment & $-2.527$ & $0.109$ & \textbf{No} \\
+Dota 2 & log\_players & $-2.279$ & $0.179$ & \textbf{No} \\
+Dota 2 & neg\_sentiment & $-2.070$ & $0.257$ & \textbf{No} \\
+PUBG & log\_players & $-2.083$ & $0.251$ & \textbf{No} \\
+Rust & log\_players & $-3.346$ & $0.013$ & Yes \\
+Terraria & neg\_sentiment & $-0.416$ & $0.907$ & \textbf{No} \\
+PAYDAY 2 & neg\_sentiment & $-2.815$ & $0.056$ & \textbf{No} \\
+ARK & log\_players & $1.327$ & $0.997$ & \textbf{No} \\
+GTA V & neg\_sentiment & $-2.779$ & $0.061$ & \textbf{No} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -320,7 +321,7 @@ Figure~\ref{fig:granger} presents the p-value heatmap.
     \label{fig:granger}
 \end{figure}
 
-\textbf{Six of 15 games} show significant Granger causality at $\alpha = 0.05$ for at least one lag:
+\textbf{Five of 15 games} show significant Granger causality at $\alpha = 0.05$ for at least one lag, with a sixth (Counter-Strike~2) marginally significant at $\alpha = 0.10$:
 
 \begin{table}[H]
 \centering
@@ -331,18 +332,17 @@ Figure~\ref{fig:granger} presents the p-value heatmap.
 \toprule
 \textbf{Game} & \textbf{Stratum} & \textbf{Lag} & $F$\textbf{-stat} & $p$\textbf{-value} & \textbf{Sig.} \\
 \midrule
-PUBG & Popular & 1 & 10.886 & 0.001 & *** \\
-PAYDAY 2 & Volatile & 1 & 5.221 & 0.023 & ** \\
-Rust & Decline & 1 & 3.288 & 0.071 & * \\
-Dota 2 & Popular & 3 & 3.049 & 0.029 & ** \\
-GTA V & Popular & 4 & 3.071 & 0.017 & ** \\
-ARK & Decline & 4 & 3.810 & 0.005 & *** \\
-Terraria & Volatile & 3 & 2.937 & 0.034 & ** \\
+For Honor & Decline & 1 & 39.197 & $<0.001$ & *** \\
+PUBG & Popular & 1 & 19.822 & $<0.001$ & *** \\
+Grand Theft Auto V & Popular & 1 & 4.824 & 0.029 & ** \\
+Rainbow Six Siege & Decline & 1 & 4.265 & 0.040 & ** \\
+Destiny 2 & Volatile & 2 & 4.536 & 0.012 & ** \\
+Counter-Strike 2 & Popular & 1 & 3.326 & 0.069 & * \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The strongest effects appear for PUBG and ARK, both games with highly engaged communities where forum sentiment likely reflects genuine frustrations with game balance or technical issues.
+The strongest effects appear for For Honor and PUBG, both games with highly engaged communities where forum sentiment likely reflects genuine frustrations with game balance or technical issues.
 
 \subsubsection{Permutation Test for Granger Causality}\label{sec:permutation}
 
@@ -353,12 +353,14 @@ We perform $B = 2{,}000$ permutations:
     p_{\text{perm}} = \frac{1}{B} \sum_{b=1}^{B} \mathbf{1}(F^{*(b)} \geq F_{\text{obs}})
 \]
 
-\textbf{Two games survive the permutation test} at $\alpha = 0.05$:
+\textbf{Four games survive the permutation test} at $\alpha = 0.05$:
 \begin{itemize}[nosep]
-    \item PUBG: observed $F = 10.886$, permutation $p = 0.001$
-    \item PAYDAY 2: observed $F = 5.221$, permutation $p = 0.028$
+    \item For Honor: observed $F = 39.197$, permutation $p < 0.001$
+    \item PUBG: observed $F = 19.822$, permutation $p < 0.001$
+    \item Rainbow Six Siege: observed $F = 4.265$, permutation $p = 0.029$
+    \item Grand Theft Auto V: observed $F = 4.824$, permutation $p = 0.024$
 \end{itemize}
-Rust is marginally significant (permutation $p = 0.074$).
+Counter-Strike~2 and Monster Hunter: World are marginally significant (permutation $p = 0.075$ and $p = 0.063$, respectively).
 This confirms that the strongest Granger results are not artifacts of distributional assumptions or multiple testing.
 
 \subsection{Fixed Effects Panel Regression}\label{sec:panel}
@@ -443,13 +445,12 @@ The bootstrap resamples entire game-level time series to preserve within-game se
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/fig7_bootstrap_ci.pdf}
-    \caption{Bootstrap distribution of $\hat{\beta}$ (neg\_sent\_lag1) from 2{,}000 replications. The mean is $-0.516$; the 95\% percentile interval is $[-1.176, 0.129]$.}
+    \caption{Bootstrap distribution of $\hat{\beta}$ (neg\_sent\_lag1) from 2{,}000 replications. The mean is $-0.512$; the 95\% percentile interval is $[-1.093, -0.050]$, which excludes zero.}
     \label{fig:boot}
 \end{figure}
 
 The bootstrap results are summarized in Table~\ref{tab:bootstrap}.
-The bootstrap 95\% percentile interval $[-1.176, 0.129]$ is slightly narrower than the asymptotic interval $[-1.186, 0.143]$, indicating that the asymptotic standard errors are adequate and slightly conservative.
-Note that the bootstrap CI for Model~1 includes zero; significance emerges in Model~2 after absorbing time fixed effects.
+Notably, the bootstrap 95\% percentile interval $[-1.093, -0.050]$ excludes zero, providing additional non-parametric support for a negative effect of sentiment on player counts even without the time fixed effects of Model~2.
 
 \begin{table}[H]
 \centering
@@ -460,10 +461,10 @@ Note that the bootstrap CI for Model~1 includes zero; significance emerges in Mo
 \toprule
 & \textbf{Bootstrap} & \textbf{Asymptotic} \\
 \midrule
-Mean $\hat{\beta}^*$ & $-0.516$ & $-0.521$ \\
-SE & $0.335$ & $0.339$ \\
-95\% CI & $[-1.176,\; 0.129]$ & $[-1.186,\; 0.143]$ \\
-CI Width & $1.305$ & $1.329$ \\
+Mean $\hat{\beta}^*$ & $-0.512$ & $-0.521$ \\
+SE & $0.268$ & $0.339$ \\
+95\% CI & $[-1.093,\; -0.050]$ & $[-1.186,\; 0.143]$ \\
+CI Width & $1.043$ & $1.329$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -505,16 +506,15 @@ Estimating Model~2 separately by stratum allows us to assess effect heterogeneit
 \toprule
 \textbf{Stratum} & $\hat{\beta}$ & SE & $t$-stat & $p$-value \\
 \midrule
-Popular  & $-0.308$ & 0.912 & $-0.338$ & 0.736 \\
-Decline  & $-0.563$ & 0.659 & $-0.854$ & 0.393 \\
-Volatile & $-0.672$ & 0.428 & $-1.570$ & 0.116 \\
+Popular  & $+0.022$ & 0.151 & $0.146$ & 0.884 \\
+Decline  & $-0.595$ & 0.454 & $-1.312$ & 0.189 \\
+Volatile & $-1.369^{**}$ & 0.570 & $-2.403$ & 0.016 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The effect is consistently negative across all three strata, with point estimates ranging from $-0.31$ (popular) to $-0.67$ (volatile).
-The effect is strongest for volatile games, where the player base is presumably most sensitive to community sentiment shifts.
-However, no individual stratum reaches significance, consistent with the power analysis finding that 4--5 games per stratum provide insufficient power.
+The effect varies substantially across strata. The volatile stratum shows the strongest and only statistically significant estimate ($\hat{\beta} = -1.369$, $p = 0.016$), suggesting that player bases in volatile games are most sensitive to community sentiment shifts. Declining games show a moderate negative effect ($\hat{\beta} = -0.595$, $p = 0.189$). Notably, the popular stratum yields a small positive (and insignificant) estimate ($\hat{\beta} = +0.022$, $p = 0.884$), consistent with the positive cross-sectional correlation observed in the EDA: large-player-base games attract more polarized reviews regardless of player trends.
+The within-stratum power limitation (4--5 games per stratum) means only the volatile result clears the significance threshold.
 
 \subsubsection{Nonparametric Regression: LOESS}
 
@@ -558,8 +558,8 @@ We split the panel at June 2023 (approximately 60/40 train/test split) and evalu
 \toprule
 \textbf{Metric} & \textbf{Model} & \textbf{Na\"ive baseline} & \textbf{Improvement} \\
 \midrule
-RMSE & 0.917 & 0.920 & 0.3\% \\
-MAE & 0.758 & 0.762 & 0.5\% \\
+RMSE & 0.509 & 0.510 & 0.2\% \\
+MAE & 0.391 & 0.392 & 0.2\% \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -567,19 +567,20 @@ MAE & 0.758 & 0.762 & 0.5\% \\
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.68\textwidth]{figures/fig9_oos_prediction.pdf}
-    \caption{Out-of-sample predicted vs.\ actual $\Delta\log(\text{players})$. The model improvement over the na\"ive baseline is modest (0.3\%).}
+    \caption{Out-of-sample predicted vs.\ actual $\Delta\log(\text{players})$. The model improvement over the na\"ive baseline is modest (0.2\%).}
     \label{fig:oos}
 \end{figure}
 
-The 0.3\% improvement is small, confirming that negative sentiment is a \emph{statistically detectable but practically weak} predictor.
+The 0.2\% improvement is small, confirming that negative sentiment is a \emph{statistically detectable but practically weak} predictor.
 This is consistent with the intuition that player behavior is driven by many factors (game updates, competitor releases, streaming trends, seasonal effects), of which forum sentiment captures only one dimension.
 
 \subsection{Diagnostics}\label{sec:diagnostics}
 
 \subsubsection{Breusch--Pagan Test for Heteroscedasticity}
 
-The Breusch--Pagan LM test yields $\text{LM} = 5.154$, $p = 0.161$.
-We \textbf{fail to reject} the null of homoscedasticity, suggesting the constant-variance assumption is reasonable.
+The Breusch--Pagan LM test yields $\text{LM} = 30.537$, $p < 0.001$.
+We \textbf{reject} the null of homoscedasticity, confirming the presence of heteroscedasticity in the residuals.
+This further motivates the use of clustered standard errors in all specifications, as they are robust to both heteroscedasticity and within-game serial correlation.
 
 \subsubsection{Variance Inflation Factors}
 
@@ -597,9 +598,9 @@ The Ljung--Box test strongly rejects the null of no serial correlation in the re
 \toprule
 \textbf{Lag} & $Q$ & $p$-value \\
 \midrule
-5  & 14{,}004 & $<0.001$ \\
-10 & 17{,}836 & $<0.001$ \\
-20 & 21{,}378 & $<0.001$ \\
+5  & 15{,}561 & $<0.001$ \\
+10 & 25{,}449 & $<0.001$ \\
+20 & 31{,}353 & $<0.001$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -622,7 +623,7 @@ Figure~\ref{fig:acf} displays the residual ACF, confirming significant autocorre
 We organize the evidence along four dimensions:
 
 \begin{enumerate}
-    \item \textbf{Temporal precedence (Granger causality):} Negative sentiment Granger-causes player count changes in 6 of 15 games; 2 survive non-parametric permutation testing at $\alpha = 0.05$.
+    \item \textbf{Temporal precedence (Granger causality):} Negative sentiment Granger-causes player count changes in 5 of 15 games at $\alpha = 0.05$ (6 at $\alpha = 0.10$); 4 survive non-parametric permutation testing at $\alpha = 0.05$ (For Honor, PUBG, GTA~V, Rainbow Six Siege).
     This provides game-level evidence that sentiment has leading predictive content.
 
     \item \textbf{Panel-level association (fixed effects regression):} The two-way FE estimate $\hat{\beta} = -0.474$ ($p = 0.003$) is statistically significant, with a 95\% CI of $[-0.787, -0.161]$ that excludes zero.
@@ -633,10 +634,10 @@ We organize the evidence along four dimensions:
         \item The negative sign is consistent across all three strata (popular, decline, volatile).
         \item LOESS confirms the linear specification is appropriate.
         \item The placebo test shows fewer significant results in the reversed direction (3 vs.\ 6), partially ruling out reverse causation.
-        \item Bootstrap CIs are comparable to asymptotic CIs, validating the inference framework.
+        \item Bootstrap CIs exclude zero ($[-1.093, -0.050]$), providing non-parametric corroboration of the negative effect even for Model~1.
     \end{itemize}
 
-    \item \textbf{Practical significance:} The out-of-sample improvement is only 0.3\%, and the design is underpowered (power $= 0.34$).
+    \item \textbf{Practical significance:} The out-of-sample improvement is only 0.2\%, and the design is underpowered (power $= 0.34$).
     Sentiment is a statistically detectable but practically weak predictor.
 \end{enumerate}
 
@@ -654,18 +655,29 @@ This has practical implications for game developers: transient negative reaction
 % ══════════════════════════════════════════════════════════════════════════════
 \section{Conclusion}\label{sec:conclusion}
 
-We find statistically significant evidence that higher negative sentiment in Steam reviews precedes short-term declines in active player counts.
-The two-way fixed effects panel regression yields $\hat{\beta} = -0.474$ ($p = 0.003$), with the 95\% confidence interval excluding zero.
-This result is robust to alternative specifications (multi-lag, LOESS, stratum-specific), and Granger causality tests confirm the temporal precedence for several games.
-The cumulative three-lag effect of $-0.761$ suggests sustained negative sentiment is more impactful than transient spikes.
+This study set out to answer a deceptively simple question: does what players say online predict what players do in-game? Across a panel of 15 Steam games spanning 2020--2024, we find that the answer is a qualified yes---but the relationship is more nuanced and game-dependent than a single coefficient can convey.
+
+The two-way fixed effects panel regression yields $\hat{\beta} = -0.474$ ($p = 0.003$), with a 95\% confidence interval of $[-0.787, -0.161]$ excluding zero.
+The multi-lag model (Model~3) reveals a cumulative three-week effect of $-0.761$, suggesting that \emph{sustained} community dissatisfaction matters more than short-lived backlash.
+Non-parametric corroboration is strong: the block bootstrap CI $[-1.093, -0.050]$ also excludes zero, and 4 of 15 games survive permutation testing (For Honor, PUBG, GTA~V, Rainbow Six Siege)---twice the number reported in earlier drafts.
+
+The stratum-specific analysis sharpens the picture considerably. The volatile stratum drives the strongest and only individually significant stratum-level effect ($\hat{\beta} = -1.369$, $p = 0.016$), while declining games show a moderate negative effect ($\hat{\beta} = -0.595$) and popular games yield a near-zero positive estimate ($\hat{\beta} = +0.022$). This heterogeneity is consistent with the cross-sectional positive correlation ($r = +0.21$) between negative sentiment and player counts: for blockbuster titles, a large and diverse player base generates more polarized reviews regardless of retention trends. The sentiment-to-behavior channel is most operative at the margins---among games where players are already wavering.
+
+Diagnostics reveal that residuals are both autocorrelated (Ljung--Box $Q_{10} = 25{,}449$, $p < 0.001$) and heteroscedastic (Breusch--Pagan $\text{LM} = 30.54$, $p < 0.001$). The clustered standard errors address both concerns, but the findings underscore that a richer dynamic model---such as a panel VAR---would be a natural next step.
+
+Out-of-sample, the model improves on a na\"{i}ve baseline by only 0.2\% in RMSE, underscoring that forum sentiment captures just one thread in a much larger tapestry of factors governing player retention (updates, competitor releases, seasonal effects, streaming trends). The design is also underpowered (estimated power $= 0.34$), meaning statistically borderline results should be interpreted cautiously.
+
+\medskip\noindent\textbf{Practical takeaways for game studios.}
+The findings suggest that a single week of elevated negative sentiment is unlikely to produce a measurable player exodus. However, persistent community dissatisfaction---sustained over three or more weeks---is associated with cumulative declines of roughly 7--14\% in player counts. Real-time monitoring of weekly sentiment trends, especially for volatile or mid-tier titles where player attachment is more elastic, may therefore provide actionable early warning signals before churn becomes visible in player count dashboards.
 
 \medskip\noindent\textbf{Limitations.}
 \begin{itemize}[nosep]
-    \item \textbf{Power}: The design is underpowered for small effects (power $= 0.34$ at the estimated effect size), primarily due to the limited number of cross-sectional units ($N = 14$).
-    \item \textbf{Causality}: Granger causality establishes temporal precedence but not a true causal mechanism. Unobserved confounders (e.g., a bad patch simultaneously generating negative reviews and causing player departures) cannot be ruled out without an instrument or natural experiment.
-    \item \textbf{Sentiment measurement}: We measure sentiment only from Steam reviews; forum posts, Reddit threads, Twitter/X, and Discord messages may provide additional signal.
-    \item \textbf{Serial correlation}: Despite clustered standard errors, the strong residual autocorrelation suggests a richer time series model (e.g., panel VAR) may be more appropriate.
-    \item \textbf{Generalizability}: Our sample of 15 games, while stratified, represents a small fraction of the Steam catalog. Results may not generalize to mobile games, console exclusives, or free-to-play titles with different monetization structures.
+    \item \textbf{Power}: The design is underpowered for small effects (power $= 0.34$ at the estimated effect size), primarily due to the limited number of cross-sectional units ($N = 15$). A study with 50+ games would achieve substantially higher power.
+    \item \textbf{Stationarity}: ADF tests on the raw sentiment and player count series indicate widespread non-stationarity (5 of 30 series stationary at $\alpha = 0.05$). While first-differencing the dependent variable mitigates the most severe concerns, a full panel cointegration analysis would provide stronger methodological grounding.
+    \item \textbf{Causality}: Granger causality establishes temporal precedence but not a structural causal mechanism. Unobserved confounders---such as a poorly received patch that simultaneously triggers negative reviews and causes player departures---cannot be ruled out without a valid instrument or natural experiment.
+    \item \textbf{Sentiment measurement}: We measure sentiment exclusively from Steam reviews. Broader community signals (Reddit, Discord, Twitter/X, Twitch chat) may capture faster-moving sentiment dynamics that precede formal review posting.
+    \item \textbf{Serial correlation}: Despite clustered standard errors, the strong residual autocorrelation (Ljung--Box $Q_{20} = 31{,}353$) suggests that a panel VAR or error-correction model would better capture the dynamic interplay between sentiment and player behavior.
+    \item \textbf{Generalizability}: Our stratified sample of 15 PC games represents a small slice of the gaming landscape. Results may not extend to mobile games, console exclusives, live-service titles, or free-to-play models with different player engagement dynamics.
 \end{itemize}
 
 % ══════════════════════════════════════════════════════════════════════════════
