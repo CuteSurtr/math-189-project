@@ -1,0 +1,715 @@
+\documentclass[11pt, letterpaper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{tcolorbox}
+\usepackage{mdframed}
+\usepackage{array}
+
+\hypersetup{colorlinks=true, linkcolor=blue!60!black, urlcolor=blue!60!black}
+
+\titlespacing*{\section}{0pt}{1.4em}{0.6em}
+\titlespacing*{\subsection}{0pt}{1.0em}{0.4em}
+
+\setstretch{1.15}
+
+% ── Custom boxes ──────────────────────────────────────────────────────────────
+\tcbuselibrary{skins, breakable}
+
+\newtcolorbox{whybox}{
+  colback=blue!5!white, colframe=blue!50!black,
+  fonttitle=\bfseries, title=Why we used this method,
+  breakable, left=6pt, right=6pt, top=4pt, bottom=4pt
+}
+
+\newtcolorbox{mathbox}{
+  colback=gray!5!white, colframe=gray!50!black,
+  fonttitle=\bfseries, title=Mathematical formulation,
+  breakable, left=6pt, right=6pt, top=4pt, bottom=4pt
+}
+
+\newtcolorbox{resultbox}{
+  colback=green!5!white, colframe=green!50!black,
+  fonttitle=\bfseries, title=Our result,
+  breakable, left=6pt, right=6pt, top=4pt, bottom=4pt
+}
+
+\newtcolorbox{speakerbox}{
+  colback=yellow!8!white, colframe=orange!70!black,
+  fonttitle=\bfseries, title=Speaker note,
+  breakable, left=6pt, right=6pt, top=4pt, bottom=4pt
+}
+
+% ── Theorem environments ───────────────────────────────────────────────────────
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+
+% ──────────────────────────────────────────────────────────────────────────────
+
+\title{\textbf{Presentation Scripts \& Method Justifications}\\[0.4em]
+\large Does Negative Forum Sentiment Predict Declines in Active Player Counts?\\[0.3em]
+\normalsize MATH 189: Data Analysis \& Inference, Winter 2026}
+\author{Jiho Lee, Kevin Xu, Viki Shi, Sharon Tey, Favio Espejo, Ankita Inamti\\
+\small University of California, San Diego}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{speakerbox}
+\textbf{How to use this document.}
+Each section covers one method from the report.
+Every section has four parts:
+(1) a plain-language description of what the method does,
+(2) why we chose it for this project,
+(3) the key mathematical formulation, and
+(4) what we found.
+The speaker notes give suggested wording for the presentation.
+\end{speakerbox}
+
+\tableofcontents
+\newpage
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Research Question and Study Design}
+
+\textbf{What we are asking:} Does negative user sentiment on Steam forums predict short-term declines in how many people are actively playing a game?
+
+\textbf{Data:} 15 Steam games, January 2020 -- September 2024 (weekly observations). Games are stratified into three lifecycle groups: Popular (CS2, Dota 2, PUBG, GTA V, Warframe), Decline (Rust, ARK, For Honor, Dead by Daylight, Rainbow Six Siege), and Volatile (No Man's Sky, Destiny 2, Terraria, Monster Hunter: World, PAYDAY 2).
+
+\begin{whybox}
+We stratified the sample deliberately to avoid survivorship bias.
+If we only picked the most popular games on Steam right now, we would miss declining games entirely, and our results would only apply to blockbusters.
+By including games from all three lifecycle phases we get variation in both sentiment and player counts that is necessary for statistical power.
+\end{whybox}
+
+\begin{speakerbox}
+``We started by asking a simple question: when players on Steam complain a lot, does that actually drive people away?
+To answer it fairly, we needed a diverse sample --- not just the biggest games.
+So we used stratified sampling: five popular titles, five in decline, and five volatile ones with big player swings.
+This gives us a complete picture of the gaming ecosystem.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Sentiment Construction: RoBERTa + CLT}
+
+\textbf{What it is:} Each Steam review is classified by a pre-trained RoBERTa transformer model (\texttt{cardiffnlp/twitter-roberta-base-sentiment}) into three classes: Positive, Neutral, Negative. The model outputs a probability score $s_j \in [0,1]$ for the ``Negative'' class. Reviews are aggregated into a weekly score per game.
+
+\begin{whybox}
+We used RoBERTa instead of a simpler rule-based approach (like VADER) for two reasons.
+First, RoBERTa uses \emph{contextual embeddings}: it reads words in context, so sarcasm, gaming slang (``this patch is trash''), and negation (``not bad'') are handled more accurately.
+Second, a pre-trained transformer requires no labeled training data from us --- we just run it on the Steam reviews directly.
+
+The weekly aggregation lets us use the \textbf{Central Limit Theorem} to justify treating $S_{it}$ as approximately normal for inference, even though individual scores are skewed.
+\end{whybox}
+
+\begin{mathbox}
+Let $\mathcal{P}_{it}$ be the set of reviews for game $i$ in week $t$.
+The weekly negative sentiment score is the mean of individual scores:
+\[
+    S_{it} = \frac{1}{|\mathcal{P}_{it}|} \sum_{j \in \mathcal{P}_{it}} s_j \in [0,1]
+\]
+
+\begin{theorem}[Lindeberg--L\'evy CLT]
+Let $s_1, s_2, \ldots, s_n \overset{\text{i.i.d.}}{\sim} F$ with $\mathbb{E}[s_j]=\mu$ and $\mathrm{Var}(s_j)=\sigma^2 < \infty$.
+Then:
+\[
+    \sqrt{n}\,\frac{\bar{s}_n - \mu}{\sigma} \xrightarrow{d} \mathcal{N}(0,1) \quad \text{as } n \to \infty
+\]
+\end{theorem}
+
+\textbf{Implication:} Even though individual review scores are skewed, $S_{it}$ is approximately normal for large $|\mathcal{P}_{it}|$.
+This justifies standard $t$-tests, $F$-tests, and confidence intervals applied to $S_{it}$.
+\end{mathbox}
+
+\begin{speakerbox}
+``To measure sentiment, we ran every Steam review through a state-of-the-art language model called RoBERTa.
+It reads each review in context --- so it understands sarcasm and gaming slang --- and outputs a negativity score between 0 and 1.
+We then average those scores for each game each week.
+The Central Limit Theorem tells us that even though individual scores are messy, the weekly average behaves like a normal distribution --- and that's what makes all our downstream statistics valid.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Stationarity Testing: Augmented Dickey--Fuller}
+
+\textbf{What it is:} A statistical test for whether a time series has a \emph{unit root} (non-stationary trend) or is stationary (fluctuates around a stable mean). Non-stationary series produce spurious correlations in regression.
+
+\begin{whybox}
+Ordinary regression assumes that the variables are stationary.
+If we regressed non-stationary player counts directly on non-stationary sentiment, we could find a ``significant'' relationship purely because both series happen to trend downward over time --- even if they have nothing to do with each other.
+This is called \emph{spurious regression}.
+
+We tested all 30 series (2 variables $\times$ 15 games) with the ADF test, then first-differenced the player count series to remove the trend before regression.
+\end{whybox}
+
+\begin{mathbox}
+The ADF test fits the model:
+\[
+    \Delta y_t = \alpha + \delta\, y_{t-1} + \sum_{j=1}^{p} \phi_j\, \Delta y_{t-j} + \varepsilon_t
+\]
+
+$H_0: \delta = 0$ (unit root, non-stationary) \quad vs \quad $H_1: \delta < 0$ (stationary).
+
+\textbf{Key fact:} Under $H_0$, the test statistic does \emph{not} follow a normal or $t$-distribution.
+It follows the Dickey--Fuller distribution, which is left-skewed with more negative critical values (5\% critical value $\approx -2.86$ with intercept, vs.\ $-1.645$ for normal).
+\end{mathbox}
+
+\begin{resultbox}
+25 of 30 series have unit roots at $\alpha = 0.05$.
+5 stationary series: Rust (\texttt{log\_players}) and ARK, Dead by Daylight, Monster Hunter: World, Warframe (\texttt{neg\_sentiment}).
+Solution: we use $\Delta\log(\text{players})$ (first-differenced) as the dependent variable throughout.
+\end{resultbox}
+
+\begin{speakerbox}
+``Before running any regressions, we had to check whether our time series are stationary --- meaning they fluctuate around a stable mean rather than drifting up or down.
+If we skip this step and both series happen to trend downward, we'd find a fake correlation.
+The Augmented Dickey--Fuller test checks for this.
+It turns out 25 of our 30 series are non-stationary, so we take first differences of the log player counts.
+That removes the trend and gives us a clean dependent variable: the week-over-week change.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Granger Causality Tests}
+
+\textbf{What it is:} A test of whether past values of sentiment help predict future player changes, \emph{beyond} what past player changes alone can predict. It tests for \emph{temporal precedence}, not structural causation.
+
+\begin{whybox}
+We cannot run a controlled experiment on Steam games.
+Granger causality is the standard tool for establishing predictive precedence in observational time series data.
+A significant Granger test tells us that sentiment contains forward-looking information about player behavior --- even after accounting for the game's own momentum.
+
+We ran separate Granger tests for each of the 15 games, which lets us see which specific titles drive the effect.
+\end{whybox}
+
+\begin{mathbox}
+\begin{definition}[Granger Causality]
+$\{S_t\}$ Granger-causes $\{Y_t\}$ if lagged $S$ improves the mean-squared forecast of $Y$ beyond lagged $Y$ alone.
+\end{definition}
+
+\textbf{Restricted model} (own lags only):
+\[
+    Y_t = c + \sum_{j=1}^{p} \phi_j\, Y_{t-j} + \varepsilon_t^R
+\]
+
+\textbf{Unrestricted model} (own lags + sentiment lags):
+\[
+    Y_t = c + \sum_{j=1}^{p} \phi_j\, Y_{t-j} + \sum_{j=1}^{q} \psi_j\, S_{t-j} + \varepsilon_t^U
+\]
+
+$H_0: \psi_1 = \psi_2 = \cdots = \psi_q = 0$.
+
+\begin{theorem}[Granger F-Test]
+Under $H_0$ with i.i.d.\ normal errors:
+\[
+    F = \frac{(\mathrm{RSS}_R - \mathrm{RSS}_U)/q}{\mathrm{RSS}_U/(T - 2p - q - 1)} \sim F(q,\; T - 2p - q - 1)
+\]
+\end{theorem}
+
+We test at lags 1--4 for each game.
+\end{mathbox}
+
+\begin{resultbox}
+\textbf{7 of 15 games} reject $H_0$ at $\alpha = 0.05$.
+Strongest: For Honor ($F = 39.197$, $p < 0.001$) and PUBG ($F = 19.823$, $p < 0.001$).
+An 8th game (Counter-Strike 2) is marginally significant at $\alpha = 0.10$.
+\end{resultbox}
+
+\begin{speakerbox}
+``The Granger causality test answers: does knowing last week's sentiment give us any extra information about this week's player count, beyond what last week's player count already tells us?
+We run this separately for all 15 games and find that 7 of them show significant results.
+This tells us sentiment isn't just a side effect --- it actually carries information about where player counts are heading.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Permutation Test for Granger Causality}
+
+\textbf{What it is:} A non-parametric version of the Granger test that does not assume normally distributed errors.
+It generates a reference distribution by randomly shuffling the sentiment time series and recomputing the $F$-statistic.
+
+\begin{whybox}
+The parametric Granger $F$-test assumes i.i.d.\ normal errors, which our diagnostics show is violated (Shapiro--Wilk $W = 0.923$, $p < 0.001$; Ljung--Box $p < 0.001$).
+The permutation test is \emph{distribution-free}: its $p$-value is exact in finite samples regardless of the error distribution.
+If a game passes the permutation test, the result cannot be blamed on a distributional assumption.
+\end{whybox}
+
+\begin{mathbox}
+\textbf{Procedure} ($B = 2{,}000$ replications):
+\begin{enumerate}[nosep]
+    \item Randomly permute $\{S_{it}\}_{t=1}^T$ within game $i$, destroying temporal order.
+    \item Recompute the Granger $F$-statistic on the permuted data: $F^{*(b)}$.
+    \item Repeat $B$ times.
+\end{enumerate}
+
+\[
+    p_{\text{perm}} = \frac{1}{B}\sum_{b=1}^{B} \mathbf{1}\!\left(F^{*(b)} \geq F_{\text{obs}}\right)
+\]
+
+\begin{lemma}[Exact Validity]
+$p_{\text{perm}}$ is exact under $H_0$ in finite samples.
+This follows from the exchangeability of the permuted series under the null of no temporal dependence between $S$ and $Y$.
+\end{lemma}
+\end{mathbox}
+
+\begin{resultbox}
+\textbf{4 of 15 games} survive at $\alpha = 0.05$: For Honor, PUBG, GTA V, Rainbow Six Siege.
+Two others are marginal: Counter-Strike 2 ($p_{\text{perm}} = 0.075$) and Monster Hunter: World ($p_{\text{perm}} = 0.063$).
+\end{resultbox}
+
+\begin{speakerbox}
+``We followed up the Granger test with a permutation test, which is more robust because it makes no distributional assumptions.
+We randomly shuffle the sentiment time series --- scrambling the temporal link between sentiment and player counts --- and recompute the $F$-statistic 2,000 times.
+The question is: how often does the shuffled data produce an $F$ as large as what we actually observed?
+Only 4 games pass this stricter test, which tells us the strongest results are real, not statistical artifacts.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Two-Way Fixed Effects Panel Regression}
+
+\textbf{What it is:} A regression model that controls for all time-invariant differences between games (e.g., genre, studio quality) and for all time-specific shocks that affect all games simultaneously (e.g., Steam seasonal sales). This is the main model of the paper.
+
+\begin{whybox}
+We have panel data: 15 games observed over 243 weeks.
+A simple OLS regression on the pooled data would confound the sentiment effect with, say, the fact that some games are inherently more popular.
+Fixed effects remove both types of confounding:
+\begin{itemize}[nosep]
+    \item \textbf{Game fixed effects} ($\alpha_i$): absorb all time-invariant game characteristics (genre, studio reputation, initial player base).
+    \item \textbf{Time fixed effects} ($\gamma_t$): absorb platform-wide events that affect all games at the same time (Steam Summer Sale, COVID lockdowns, competing game releases).
+\end{itemize}
+After removing these effects, the remaining variation in $\hat{\beta}$ reflects only the within-game relationship between sentiment and player changes.
+\end{whybox}
+
+\begin{mathbox}
+The model:
+\[
+    \Delta\log Y_{it} = \alpha_i + \gamma_t + \beta\, S_{i,t-1} + X_{it}\,\theta + \varepsilon_{it}
+\]
+
+\textbf{Within (demeaning) estimator.} Define:
+\[
+    \ddot{Z}_{it} = Z_{it} - \bar{Z}_{i\cdot} - \bar{Z}_{\cdot t} + \bar{Z}_{\cdot\cdot}
+\]
+OLS on demeaned data eliminates $\alpha_i$ and $\gamma_t$:
+\[
+    \hat{\beta}_{\text{FE}} = \left(\sum_{i,t} \ddot{\mathbf{x}}_{it}\ddot{\mathbf{x}}_{it}'\right)^{-1} \sum_{i,t} \ddot{\mathbf{x}}_{it}\ddot{Y}_{it}
+\]
+
+\begin{corollary}[Consistency \& Asymptotic Normality]
+Under strict exogeneity $\mathbb{E}[\varepsilon_{it} \mid \mathbf{x}_i, \alpha_i, \gamma_t] = 0$:
+\[
+    \sqrt{N}\,(\hat{\beta}_{\text{FE}} - \beta) \xrightarrow{d} \mathcal{N}\!\left(0,\; \Sigma^{-1}\Omega\,\Sigma^{-1}\right)
+\]
+where $\Omega$ accounts for within-game serial correlation (clustered standard errors).
+\end{corollary}
+\end{mathbox}
+
+\begin{resultbox}
+Three models estimated ($N = 3{,}630$ observations):
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\toprule
+& \textbf{Model 1} & \textbf{Model 2} & \textbf{Model 3} \\
+& Entity FE & Two-Way FE & Multi-Lag \\
+\midrule
+$\hat{\beta}_1$ & $-0.511^{**}$ $(0.251)$ & $-0.649^{**}$ $(0.316)$ & $-0.152$ $(0.151)$ \\
+$\hat{\beta}_2$ & --- & --- & $-0.017$ $(0.024)$ \\
+$\hat{\beta}_3$ & --- & --- & $-0.611^{**}$ $(0.268)$ \\
+$p$-value & $0.042$ & $0.040$ & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Model 2 preferred:} $\hat{\beta} = -0.649$, $p = 0.040$, 95\% CI $= [-1.268,\,-0.030]$.\\
+\textbf{Model 3 cumulative:} $-0.152 - 0.017 - 0.611 = -0.780$ over three weeks.
+\end{resultbox}
+
+\begin{speakerbox}
+``The core of our analysis is a two-way fixed effects regression.
+Think of it this way: we strip out everything that makes each game unique --- its genre, its fanbase, its history --- and we also strip out everything that happened on Steam platform-wide in a given week.
+What's left is the pure within-game, within-week relationship between sentiment and player changes.
+Our estimate: a one-unit increase in negativity is associated with a 64.9\% decline in that week's player count change.
+The $p$-value is 0.040, which is significant, and the confidence interval excludes zero.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Hausman Test: Fixed vs.\ Random Effects}
+
+\textbf{What it is:} A specification test that determines whether game-level unobservables are correlated with the regressors (fixed effects model required) or uncorrelated (random effects is also valid).
+
+\begin{whybox}
+The random effects (RE) model is more efficient when its assumptions hold, because it uses between-game variation in addition to within-game variation.
+However, RE assumes that unobserved game characteristics (e.g., community toxicity, developer responsiveness) are \emph{uncorrelated} with sentiment --- a strong and implausible assumption.
+We ran the Hausman test to check this formally.
+Even though the test fails to reject the RE assumptions, we still prefer FE on theoretical grounds.
+\end{whybox}
+
+\begin{mathbox}
+\begin{theorem}[Hausman, 1978]
+Under $H_0$ (RE correctly specified, $\text{Cov}(\alpha_i, \mathbf{x}_{it}) = 0$):
+\[
+    H = (\hat{\boldsymbol{\beta}}_{\text{FE}} - \hat{\boldsymbol{\beta}}_{\text{RE}})'\!
+    \Big[\widehat{\text{Var}}(\hat{\boldsymbol{\beta}}_{\text{FE}}) - \widehat{\text{Var}}(\hat{\boldsymbol{\beta}}_{\text{RE}})\Big]^{-1}\!
+    (\hat{\boldsymbol{\beta}}_{\text{FE}} - \hat{\boldsymbol{\beta}}_{\text{RE}}) \xrightarrow{d} \chi^2_k
+\]
+Reject $H_0$ $\Rightarrow$ only FE is consistent. Fail to reject $\Rightarrow$ RE is also acceptable.
+\end{theorem}
+\end{mathbox}
+
+\begin{resultbox}
+$\chi^2(2) = 1.774$, $p = 0.412$: fail to reject $H_0$.
+Random effects is statistically acceptable, but we prefer FE because the RE assumption is implausible in this context --- game-specific unobservables (community size, developer behavior) are plausibly correlated with sentiment levels.
+\end{resultbox}
+
+\begin{speakerbox}
+``We asked: do we really need fixed effects, or could a simpler random effects model work?
+The Hausman test compares the two: if game-specific unobservables correlate with sentiment, random effects gives biased estimates and only fixed effects is safe.
+The test $p$-value of 0.412 says statistically we can't tell the difference --- but theoretically, we know game characteristics like studio reputation are correlated with how players review the game.
+So we stuck with fixed effects as the safer, more defensible choice.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Clustered Standard Errors}
+
+\textbf{What it is:} A method of computing standard errors that is robust to both heteroscedasticity (non-constant error variance) and serial correlation (errors within a game correlated over time).
+
+\begin{whybox}
+Standard OLS standard errors assume errors are i.i.d.\ (independent and identically distributed).
+Two diagnostic tests show this fails badly in our data:
+\begin{itemize}[nosep]
+    \item \textbf{Breusch--Pagan test}: LM $= 30.537$, $p < 0.001$ --- heteroscedasticity present.
+    \item \textbf{Ljung--Box test}: $Q(20) = 31{,}353$, $p < 0.001$ --- strong serial correlation.
+\end{itemize}
+Using ordinary SEs would make our confidence intervals too narrow and our $t$-statistics too large, leading to over-rejection of $H_0$.
+Clustered SEs correct for both problems by allowing any within-game correlation structure.
+\end{whybox}
+
+\begin{mathbox}
+\begin{theorem}[Clustered Variance Estimator]
+When observations are independent across games $i = 1,\ldots,N$ but arbitrarily correlated within games:
+\[
+    \hat{V}_{\text{clust}} = (X'X)^{-1} \!\left(\sum_{i=1}^{N} \mathbf{X}_i'\hat{\boldsymbol{\varepsilon}}_i\hat{\boldsymbol{\varepsilon}}_i'\mathbf{X}_i\right)\!(X'X)^{-1}
+\]
+This is consistent for $\text{Var}(\hat{\boldsymbol{\beta}})$ as $N \to \infty$, regardless of within-cluster correlation.
+\end{theorem}
+
+\textbf{Breusch--Pagan LM test:} Under $H_0$ (homoscedasticity), regress $\hat{\varepsilon}^2$ on regressors; $\text{LM} = n \cdot R^2 \sim \chi^2_k$.
+
+\textbf{Ljung--Box portmanteau test:}
+\[
+    Q(m) = T(T+2)\sum_{k=1}^{m} \frac{\hat{\rho}_k^2}{T-k} \xrightarrow{d} \chi^2_m \quad \text{under no serial correlation}
+\]
+\end{mathbox}
+
+\begin{speakerbox}
+``Our standard errors use a technique called clustering.
+The idea is that observations from the same game are correlated with each other over time --- if GTA V had a bad week, the next week is probably related.
+Standard errors that ignore this would be artificially small, making our results look more significant than they are.
+Clustered standard errors allow any correlation pattern within a game and give us an honest picture of uncertainty.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Block Bootstrap Confidence Intervals}
+
+\textbf{What it is:} A resampling method that constructs confidence intervals by repeatedly re-estimating the model on random resamples of the data, without assuming any parametric distribution for the errors.
+
+\begin{whybox}
+Asymptotic confidence intervals rely on the normal approximation $\hat{\beta} \approx \mathcal{N}(\beta, \text{SE}^2)$.
+With $N = 15$ games and non-normal, serially correlated errors, this approximation may be poor.
+The block bootstrap:
+\begin{itemize}[nosep]
+    \item Requires \emph{no distributional assumptions} on $\varepsilon_{it}$.
+    \item Resamples entire game panels (not individual rows) to preserve within-game time structure.
+    \item Provides an independent check: if the bootstrap CI agrees with the asymptotic CI, both are trustworthy.
+\end{itemize}
+\end{whybox}
+
+\begin{mathbox}
+\textbf{Procedure} ($B = 2{,}000$ replications, seed $= 189$):
+\begin{enumerate}[nosep]
+    \item Draw 15 games with replacement from $\{1,\ldots,15\}$.
+    \item Stack all time periods for the sampled games into a bootstrap panel.
+    \item Fit the entity-FE model; record $\hat{\beta}^{*(b)}$.
+    \item Repeat. Report $[\hat{\beta}^{*}_{(0.025)},\, \hat{\beta}^{*}_{(0.975)}]$.
+\end{enumerate}
+
+\begin{lemma}[Why game-level resampling?]
+Resampling entire game panels preserves the within-game temporal dependence $\{\varepsilon_{it}\}_{t=1}^{T}$.
+Row-level resampling would treat observations as i.i.d.\ and understate uncertainty when serial correlation is present.
+\end{lemma}
+
+Bootstrap SE: $\displaystyle\widehat{\text{SE}}_{\text{boot}} = \sqrt{\frac{1}{B-1}\sum_{b=1}^{B}\!\left(\hat{\beta}^{*(b)} - \bar{\hat{\beta}}^*\right)^2}$
+\end{mathbox}
+
+\begin{resultbox}
+Mean $\hat{\beta}^* = -0.512$, bootstrap SE $= 0.268$.\\
+95\% bootstrap CI $= [-1.093,\,-0.050]$ --- excludes zero.\\
+95\% asymptotic CI $= [-1.004,\,-0.019]$ --- also excludes zero.\\
+Both CIs agree: the negative effect is robust to distributional assumptions.
+\end{resultbox}
+
+\begin{speakerbox}
+``To make sure our confidence interval doesn't depend on assuming normal errors, we also computed a bootstrap CI.
+We resample all 15 games with replacement 2,000 times, re-estimate the model each time, and look at the distribution of estimates.
+The 2.5th and 97.5th percentiles give us the CI.
+The key design choice is resampling whole games --- not individual weeks --- so we preserve the time structure within each game.
+Our bootstrap CI of $[-1.093, -0.050]$ agrees with the asymptotic one, confirming the result is real.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Statistical Power Analysis}
+
+\textbf{What it is:} Power is the probability of correctly rejecting $H_0$ when it is false. The Minimum Detectable Effect (MDE) is the smallest true effect size for which the test achieves 80\% power.
+
+\begin{whybox}
+We report power because a statistically significant result with low power still deserves scrutiny.
+With only $N = 15$ games, our study is limited in its ability to detect small effects.
+Reporting power is \emph{honest}: it tells the reader how much to trust a null result, and it tells the reader that our significant result ($p = 0.040$) is at the edge of what our design can reliably detect.
+\end{whybox}
+
+\begin{mathbox}
+\begin{theorem}[Power Formula]
+For a two-sided test at level $\alpha$ with $\hat{\beta} \approx \mathcal{N}(\beta_a, \text{SE}^2)$:
+\[
+    \text{Power}(\beta_a) = 1 - \Phi\!\left(z_{1-\alpha/2} - \frac{|\beta_a|}{\text{SE}}\right) + \Phi\!\left(-z_{1-\alpha/2} - \frac{|\beta_a|}{\text{SE}}\right)
+\]
+\end{theorem}
+
+\textbf{Minimum Detectable Effect.} The smallest $|\beta^*|$ achieving power $\geq 1-\kappa$:
+\[
+    |\beta^*| = (z_{1-\alpha/2} + z_{1-\kappa})\cdot\text{SE}(\hat{\beta})
+\]
+
+\textbf{Derivation:} Set Power $= 1-\kappa$ (ignoring negligible second tail):
+\[
+    z_{1-\alpha/2} - \frac{|\beta^*|}{\text{SE}} = -z_{1-\kappa}
+    \implies |\beta^*| = (z_{1-\alpha/2} + z_{1-\kappa})\cdot\text{SE}
+\]
+\end{mathbox}
+
+\begin{resultbox}
+With SE $= 0.251$, $\alpha = 0.05$ ($z_{0.975} = 1.960$), 80\% power ($z_{0.80} = 0.842$):
+\[
+    \text{MDE} = (1.960 + 0.842)\times 0.251 = 0.707
+\]
+Our estimated effect $|\hat{\beta}| = 0.511 < 0.707 = \text{MDE}$, so power at the observed effect is only $\mathbf{0.535}$.
+The design is \textbf{underpowered}: even at the true effect, we would correctly reject $H_0$ only about half the time.
+\end{resultbox}
+
+\begin{speakerbox}
+``Here's where we have to be honest about our study's limitations.
+Power is the probability that we would detect a real effect if it exists.
+With 15 games, our power is only 0.535 at the observed effect size --- barely above a coin flip.
+The minimum detectable effect is 0.707, but our estimate is 0.511, which is smaller.
+So while we did find a significant result, we need many more games in the panel to be confident we're not missing anything.
+We report this transparently so the reader can judge the result appropriately.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Stratum-Specific Regressions}
+
+\textbf{What it is:} Re-estimating Model 2 separately for each of the three game lifecycle strata (Popular, Decline, Volatile) to check whether the sentiment--player relationship varies by game type.
+
+\begin{whybox}
+The panel regression estimates a single $\hat{\beta}$ that is an average across all 15 games.
+But the effect might be very different for a blockbuster like CS2 vs.\ a struggling game like For Honor.
+Stratum-specific regressions reveal this heterogeneity and tell us \emph{for which types of games} sentiment is most predictive.
+
+This also serves as a robustness check: if the negative sign only shows up in one stratum, the overall result is less convincing.
+\end{whybox}
+
+\begin{resultbox}
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Stratum} & $\hat{\beta}$ & SE & $p$-value & Interpretation \\
+\midrule
+Popular  & $+0.022$ & 0.151 & 0.884 & Near-zero; large games are resilient \\
+Decline  & $-0.595$ & 0.454 & 0.189 & Negative but not significant (5 games) \\
+Volatile & $-1.369^{**}$ & 0.570 & 0.016 & Strongest effect; fragile player bases \\
+\bottomrule
+\end{tabular}
+\end{center}
+Sentiment is most predictive for volatile games where the player base is already fragile and responsive to community discourse.
+\end{resultbox}
+
+\begin{speakerbox}
+``When we split the analysis by game type, an interesting pattern emerges.
+For popular games --- CS2, Dota 2, GTA V --- the estimate is essentially zero.
+These games have huge, loyal player bases that don't respond much to a few bad reviews.
+For volatile games --- the ones with big swings around updates --- sentiment has a much stronger effect: an estimate of negative 1.37.
+This makes intuitive sense: in a volatile game, the marginal player is more likely to be swayed by community sentiment.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{LOESS: Nonparametric Regression Check}
+
+\textbf{What it is:} Locally Estimated Scatterplot Smoothing (LOESS) fits a smooth curve through a scatterplot without assuming any global functional form.
+
+\begin{whybox}
+Our panel model assumes a \emph{linear} relationship between sentiment and player changes.
+If the true relationship is curved (e.g., sentiment only matters above a threshold, or the effect reverses at very high negativity), the linear model would be misspecified and the slope estimate $\hat{\beta}$ would be meaningless.
+
+LOESS lets us visually verify linearity without imposing it.
+If the LOESS curve tracks the OLS line, linear regression is appropriate.
+\end{whybox}
+
+\begin{mathbox}
+At each evaluation point $x_0$, LOESS fits a local weighted polynomial:
+\[
+    \hat{m}(x_0) = \arg\min_{\mathbf{b}} \sum_{i=1}^{n} K\!\left(\frac{|x_i - x_0|}{h(x_0)}\right)\!\left(y_i - b_0 - b_1(x_i - x_0)\right)^2
+\]
+where $K(u) = (1 - |u|^3)^3\,\mathbf{1}(|u| \leq 1)$ is the tricube kernel and $h(x_0)$ is the adaptive bandwidth (span $= 0.3$).
+
+No global functional form is assumed; the curve is derived entirely from local patterns in the data.
+\end{mathbox}
+
+\begin{resultbox}
+The LOESS curve (span $= 0.3$) closely tracks the OLS line across all 3,630 observations. No evidence of nonlinearity. The linear specification is validated.
+\end{resultbox}
+
+\begin{speakerbox}
+``One assumption we had to verify was linearity.
+LOESS is a nonparametric smoother --- it fits a curve through the scatterplot without any assumption about its shape.
+If the true relationship were curved or threshold-like, the LOESS line would deviate from our OLS line.
+But they track each other closely, which tells us the linear model is appropriate for this data.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Placebo Test: Reversed Lag Direction}
+
+\textbf{What it is:} A falsification test that checks for reverse causation by testing whether \emph{future} sentiment predicts \emph{past} player changes.
+
+\begin{whybox}
+A concern with any observational study is reverse causation: maybe declining player counts \emph{cause} negative sentiment, not the other way around.
+If this is the only mechanism, then future sentiment should also ``predict'' past changes (because both are driven by the same underlying decline).
+By reversing the lag direction, we test this.
+
+A genuine temporal precedence result should show many more significant games in the original direction than in the reversed direction.
+\end{whybox}
+
+\begin{resultbox}
+\begin{itemize}[nosep]
+    \item Original direction (sentiment leads changes): \textbf{7/15} games significant at $\alpha = 0.05$.
+    \item Reversed direction (future sentiment predicts past changes): \textbf{3/15} games significant.
+\end{itemize}
+The asymmetry (7 vs.\ 3) provides partial evidence against pure reverse causation.
+However, 3 significant reversed results caution that some bidirectional feedback may exist.
+\end{resultbox}
+
+\begin{speakerbox}
+``A natural concern is whether we have the direction backwards --- maybe declining player counts cause negative reviews, not the other way around.
+To test this, we flip the lag direction: does \emph{next} week's sentiment predict \emph{this} week's player change?
+Under pure reverse causation, both directions should give similar results.
+But we get 7 significant games going forward and only 3 going backward.
+That asymmetry supports our interpretation that sentiment has genuine predictive content for future player behavior, not just as a reflection of the past.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Out-of-Sample Prediction}
+
+\textbf{What it is:} Splitting the panel into a training period and a test period, then evaluating how well the model predicts player changes on data it has never seen.
+
+\begin{whybox}
+In-sample $R^2$ and $p$-values can be inflated by overfitting.
+Out-of-sample prediction tests whether sentiment provides genuine \emph{practical} predictive value beyond a naïve baseline.
+The naïve baseline here is predicting zero change every week (i.e., using only the mean).
+
+A small out-of-sample improvement is honest evidence about effect magnitude.
+\end{whybox}
+
+\begin{resultbox}
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Model} & \textbf{Naïve Baseline} & \textbf{Improvement} \\
+\midrule
+RMSE & 0.509 & 0.510 & 0.2\% \\
+MAE  & 0.391 & 0.392 & 0.2\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+Training: 2020-02-10 to 2023-05-29 (2,587 obs).
+Test: 2023-06-05 to 2024-09-30 (1,043 obs).
+
+The 0.2\% improvement is statistically detectable but practically weak.
+Sentiment is a real signal but a minor one compared to other factors driving player behavior.
+\end{resultbox}
+
+\begin{speakerbox}
+``The final practical test: does our model actually predict better than doing nothing?
+We trained on data through May 2023 and predicted the held-out period through September 2024.
+The sentiment model beats a naïve baseline by 0.2\% in RMSE.
+That's a real improvement, but it's tiny.
+Sentiment is a statistically detectable signal, but it explains only a small part of what drives player behavior.
+Game updates, competitor launches, streaming trends --- all of these matter much more.''
+\end{speakerbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Summary: Why Each Method?}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\small
+\begin{tabular}{p{3.8cm} p{4.2cm} p{5.5cm}}
+\toprule
+\textbf{Method} & \textbf{Why we used it} & \textbf{What it told us} \\
+\midrule
+Stratified sampling & Avoid survivorship bias; ensure variation in outcome & Captured popular, declining, and volatile games fairly \\
+\midrule
+RoBERTa sentiment & Contextual understanding of gaming language; no labeled data needed & Outperforms bag-of-words models on nuanced review text \\
+\midrule
+CLT justification & Makes weekly mean $S_{it}$ approximately normal for inference & Validates use of $t$- and $F$-tests on aggregated sentiment \\
+\midrule
+ADF stationarity & Prevents spurious regression from trending series & 25/30 series non-stationary; first-differencing required \\
+\midrule
+Granger causality & Tests temporal precedence in observational time series & 7/15 games show sentiment leads player changes \\
+\midrule
+Permutation test & Distribution-free alternative to parametric Granger & 4/15 games survive; strongest results are not artifacts \\
+\midrule
+Two-way FE & Controls for game and time heterogeneity simultaneously & $\hat{\beta} = -0.649$, $p = 0.040$; robust to confounding \\
+\midrule
+Hausman test & Formally compare FE vs.\ RE specifications & FE preferred on both statistical and theoretical grounds \\
+\midrule
+Clustered SEs & Correct for heteroscedasticity and serial correlation & Honest uncertainty quantification for panel time series \\
+\midrule
+Block bootstrap & Non-parametric CI; no distributional assumption & CI $= [-1.093, -0.050]$; confirms asymptotic result \\
+\midrule
+Power analysis & Honest reporting of study limitations & Power $= 0.535$; MDE $= 0.707$; design underpowered \\
+\midrule
+Stratum regressions & Test effect heterogeneity across game lifecycle phases & Effect concentrated in volatile games ($\hat{\beta} = -1.369$) \\
+\midrule
+LOESS & Verify linearity assumption nonparametrically & Linear specification validated \\
+\midrule
+Placebo test & Falsification against reverse causation & 7 vs.\ 3 significant games; temporal ordering supported \\
+\midrule
+Out-of-sample prediction & Test practical predictive value; guard against overfitting & 0.2\% improvement; signal is real but weak \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{1em}
+\begin{speakerbox}
+\textbf{Closing script suggestion:}\\
+``Every method we used was chosen for a specific reason.
+We didn't just throw statistical tests at the data --- each one addresses a specific threat to the validity of our conclusions.
+The Granger test checks temporal ordering.
+The permutation test drops the normality assumption.
+Fixed effects remove game-level confounding.
+The bootstrap gives us distribution-free intervals.
+And the power analysis tells us honestly what we can and cannot conclude with 15 games.
+The overall picture is consistent: negative sentiment has a statistically significant but practically modest predictive effect on player counts, and it's strongest for games where the player base is already fragile.''
+\end{speakerbox}
+
+\end{document}
