@@ -227,21 +227,21 @@ The right panel plots current sentiment against next-week $\Delta\log(\text{play
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figures/fig2_sentiment_dist.pdf}
-    \caption{Distribution of weekly negative sentiment scores by stratum. Popular games show higher and more variable negativity; volatile games show the lowest mean but with occasional spikes.}
+    \caption{Sentiment exploratory analysis by stratum. \textit{Left:} overlaid density histograms of weekly negative sentiment scores (popular = blue, decline = red, volatile = gold). \textit{Middle:} boxplots (outliers excluded) confirming the popular $>$ decline $>$ volatile ordering in spread and median. \textit{Right:} scatter of current negative sentiment vs.\ next-week $\Delta\log(\text{players})$, showing a weak, noisy negative pattern.}
     \label{fig:sentdist}
 \end{figure}
 
 \subsection{Time Series Visualization}
 
-Figure~\ref{fig:ts} overlays negative sentiment and log player counts for Counter-Strike~2, ARK: Survival Evolved, and No Man's Sky, chosen as representatives for each game stratum.
+Figure~\ref{fig:ts} overlays log player counts and a 4-week moving average of negative sentiment for Counter-Strike~2, ARK: Survival Evolved, and No Man's Sky, chosen as representatives for each game stratum.
 Counter-Strike~2 (popular) shows stable player activity with sentiment fluctuations but no large immediate player declines, suggesting popular games are resilient to negative discussion.
-ARK (decline) shows a gradual downward trend in players; sentiment spikes occasionally coincide with player dips but the relationship is weak.
+ARK (decline) shows a gradual downward trend in players; smoothed sentiment spikes occasionally coincide with player dips but the relationship is weak.
 No Man's Sky (volatile) exhibits larger fluctuations in both series, with sentiment spikes appearing around volatile player periods, suggesting volatile games show stronger sentiment-to-player-change links.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.88\textwidth]{figures/fig3_timeseries_dota2.pdf}
-    \caption{Time series: weekly log players (blue, left axis) and negative sentiment (red, right axis) for representative games from each stratum. Sentiment spikes occasionally precede player count dips.}
+    \caption{Time series: weekly log players (blue, left axis) and 4-week moving average of negative sentiment (red, right axis) for one representative game from each stratum. Smoothed sentiment spikes occasionally precede player count dips.}
     \label{fig:ts}
 \end{figure}
 
@@ -377,7 +377,7 @@ Figure~\ref{fig:granger} presents the p-value heatmap; darker green indicates st
 For Honor         & Decline  & 1 & 39.197 & $<0.001$ & *** \\
 PUBG              & Popular  & 1 & 19.823 & $<0.001$ & *** \\
 Dead by Daylight  & Decline  & 2 & 11.165 & $<0.001$ & *** \\
-Grand Theft Auto V & Popular & 2 &  6.870 & $0.001$  & *** \\
+Grand Theft Auto V & Popular & 1 &  4.824 & $0.029$  & **  \\
 Destiny 2         & Volatile & 2 &  4.536 & $0.012$  & **  \\
 Dota 2            & Popular  & 3 &  4.055 & $0.008$  & **  \\
 Rainbow Six Siege & Decline  & 1 &  4.265 & $0.040$  & **  \\
@@ -569,7 +569,7 @@ Figure~\ref{fig:loess} shows that the LOESS curve closely tracks the OLS line, s
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.72\textwidth]{figures/fig8_loess.pdf}
-    \caption{LOESS vs.\ OLS linear fit: lagged negative sentiment $\to$ $\Delta\log(\text{players})$, stratified by game stratum. The LOESS curve closely tracks the OLS line, supporting linearity.}
+    \caption{LOESS vs.\ OLS linear fit: lagged negative sentiment $\to$ $\Delta\log(\text{players})$ across all 3{,}630 observations (grey scatter). The LOESS curve (red) closely tracks the OLS line (blue dashed), supporting the linear specification.}
 \label{fig:loess}
 \end{figure}
 
@@ -609,7 +609,7 @@ MAE  & 0.391 & 0.392 & 0.2\% \\
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.68\textwidth]{figures/fig9_oos_prediction.pdf}
-    \caption{Out-of-sample predicted vs.\ actual $\log(\text{players})$ on the test set (2023-06-05 to 2024-09-30). RMSE $= 0.509$, only 0.2\% below the na\"ive baseline.}
+    \caption{Out-of-sample predicted vs.\ actual $\Delta\log(\text{players})$ on the test set (2023-06-05 to 2024-09-30). The red dashed line is the 45° reference. RMSE $= 0.509$, only 0.2\% below the na\"ive baseline.}
     \label{fig:oos}
 \end{figure}
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.1)  13 MAR 2026 20:38
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.1)  14 MAR 2026 10:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -562,53 +562,52 @@ LaTeX Warning: Citation `barbieri2020' on page 5 undefined on input line 172.
 
 LaTeX Warning: Citation `hutto2014' on page 5 undefined on input line 175.
 
-<figures/fig1_player_trends.pdf, id=273, 1005.5729pt x 302.70047pt>
+<figures/fig1_player_trends.pdf, id=238, 1005.5729pt x 302.70047pt>
 File: figures/fig1_player_trends.pdf Graphic file (type pdf)
 <use figures/fig1_player_trends.pdf>
 Package pdftex.def Info: figures/fig1_player_trends.pdf  used on input line 212
 .
 (pdftex.def)             Requested size: 469.75502pt x 141.4055pt.
 [5]
-<figures/fig2_sentiment_dist.pdf, id=287, 1005.39665pt x 302.863pt>
+<figures/fig2_sentiment_dist.pdf, id=252, 1293.97614pt x 380.19191pt>
 File: figures/fig2_sentiment_dist.pdf Graphic file (type pdf)
 <use figures/fig2_sentiment_dist.pdf>
 Package pdftex.def Info: figures/fig2_sentiment_dist.pdf  used on input line 22
 9.
-(pdftex.def)             Requested size: 469.75502pt x 141.50917pt.
+(pdftex.def)             Requested size: 469.75502pt x 138.01762pt.
  [6 <./figures/fig1_player_trends.pdf> <./figures/fig2_sentiment_dist.pdf>]
-<figures/fig3_timeseries_dota2.pdf, id=397, 717.29909pt x 282.43631pt>
+<figures/fig3_timeseries_dota2.pdf, id=395, 1006.2078pt x 716.02596pt>
 File: figures/fig3_timeseries_dota2.pdf Graphic file (type pdf)
 <use figures/fig3_timeseries_dota2.pdf>
 Package pdftex.def Info: figures/fig3_timeseries_dota2.pdf  used on input line 
 243.
-(pdftex.def)             Requested size: 413.3867pt x 162.77025pt.
+(pdftex.def)             Requested size: 413.3867pt x 294.17345pt.
 
 Overfull \hbox (11.19263pt too wide) in paragraph at lines 250--254
 \OT1/cmr/m/n/10.95 Figure [][]4[][] shows the mean cross-correlation func-tion 
 (CCF) be-tween neg-a-tive sen-ti-ment and $[]([])$
  []
 
-<figures/fig4_crosscorrelation.pdf, id=399, 571.78983pt x 283.16716pt>
+<figures/fig4_crosscorrelation.pdf, id=397, 571.78983pt x 283.16716pt>
 File: figures/fig4_crosscorrelation.pdf Graphic file (type pdf)
 <use figures/fig4_crosscorrelation.pdf>
 Package pdftex.def Info: figures/fig4_crosscorrelation.pdf  used on input line 
 257.
 (pdftex.def)             Requested size: 272.45877pt x 134.92923pt.
-[7 <./figures/fig3_timeseries_dota2.pdf> <./figures/fig4_crosscorrelation.pdf>]
-<figures/fig5_within_game.pdf, id=491, 402.00188pt x 294.34969pt>
+[7 <./figures/fig3_timeseries_dota2.pdf>]
+<figures/fig5_within_game.pdf, id=454, 402.00188pt x 294.34969pt>
 File: figures/fig5_within_game.pdf Graphic file (type pdf)
 <use figures/fig5_within_game.pdf>
 Package pdftex.def Info: figures/fig5_within_game.pdf  used on input line 270.
 (pdftex.def)             Requested size: 244.27461pt x 178.85687pt.
-<figures/conditional_probability_decline.pdf, id=493, 895.09406pt x 368.1253pt>
+<figures/conditional_probability_decline.pdf, id=456, 895.09406pt x 368.1253pt>
 
 File: figures/conditional_probability_decline.pdf Graphic file (type pdf)
 <use figures/conditional_probability_decline.pdf>
 Package pdftex.def Info: figures/conditional_probability_decline.pdf  used on i
 nput line 283.
 (pdftex.def)             Requested size: 244.27461pt x 100.4624pt.
-[8 <./figures/fig5_within_game.pdf> <./figures/conditional_probability_decline.
-pdf>]
+ [8 <./figures/fig4_crosscorrelation.pdf> <./figures/fig5_within_game.pdf>]
 Overfull \hbox (2.68335pt too wide) in paragraph at lines 301--305
 []\OT1/cmr/m/n/10.95 Of the 30 se-ries tested (2 vari-ables $\OMS/cmsy/m/n/10.9
 5 ^^B$ \OT1/cmr/m/n/10.95 15 games), \OT1/cmr/bx/n/10.95 5 are sta-tion-ary at 
@@ -616,42 +615,43 @@ $\OML/cmm/m/it/10.95  \OT1/cmr/m/n/10.95 = 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/
 10.95 05$: Rust (\OT1/cmtt/m/n/10.95 log[]players\OT1/cmr/m/n/10.95 ),
  []
 
-[9]
-<figures/fig6_granger_heatmap.pdf, id=513, 562.62865pt x 427.14883pt>
+[9 <./figures/conditional_probability_decline.pdf>]
+<figures/fig6_granger_heatmap.pdf, id=519, 562.62865pt x 427.14883pt>
 File: figures/fig6_granger_heatmap.pdf Graphic file (type pdf)
 <use figures/fig6_granger_heatmap.pdf>
 Package pdftex.def Info: figures/fig6_granger_heatmap.pdf  used on input line 3
 61.
 (pdftex.def)             Requested size: 385.20255pt x 292.44527pt.
  [10] [11 <./figures/fig6_granger_heatmap.pdf>] [12]
-<figures/fig7_bootstrap_ci.pdf, id=596, 570.66594pt x 280.56056pt>
+<figures/fig7_bootstrap_ci.pdf, id=602, 570.66594pt x 280.56056pt>
 File: figures/fig7_bootstrap_ci.pdf Graphic file (type pdf)
 <use figures/fig7_bootstrap_ci.pdf>
 Package pdftex.def Info: figures/fig7_bootstrap_ci.pdf  used on input line 487.
 
 (pdftex.def)             Requested size: 352.31625pt x 173.21368pt.
  [13] [14 <./figures/fig7_bootstrap_ci.pdf>]
-<figures/fig8_loess.pdf, id=667, 571.661pt x 355.39198pt>
+<figures/fig8_loess.pdf, id=673, 571.661pt x 355.39198pt>
 File: figures/fig8_loess.pdf Graphic file (type pdf)
 <use figures/fig8_loess.pdf>
 Package pdftex.def Info: figures/fig8_loess.pdf  used on input line 571.
 (pdftex.def)             Requested size: 338.22418pt x 210.2651pt.
  [15]
-<figures/fig9_oos_prediction.pdf, id=674, 571.92093pt x 283.12198pt>
+<figures/fig9_oos_prediction.pdf, id=680, 571.92093pt x 283.12198pt>
 File: figures/fig9_oos_prediction.pdf Graphic file (type pdf)
 <use figures/fig9_oos_prediction.pdf>
 Package pdftex.def Info: figures/fig9_oos_prediction.pdf  used on input line 61
 1.
 (pdftex.def)             Requested size: 319.42996pt x 158.13249pt.
- [16 <./figures/fig8_loess.pdf>] [17 <./figures/fig9_oos_prediction.pdf>]
-<figures/fig10_residual_acf.pdf, id=781, 564.55026pt x 246.3013pt>
+
+[16 <./figures/fig8_loess.pdf>] [17 <./figures/fig9_oos_prediction.pdf>]
+<figures/fig10_residual_acf.pdf, id=787, 564.55026pt x 246.3013pt>
 File: figures/fig10_residual_acf.pdf Graphic file (type pdf)
 <use figures/fig10_residual_acf.pdf>
 Package pdftex.def Info: figures/fig10_residual_acf.pdf  used on input line 660
 .
 (pdftex.def)             Requested size: 338.22418pt x 147.56393pt.
- [18 <./figures/fig10_residual_acf.pdf>] [19] [20]
-(./report.aux)
+
+[18 <./figures/fig10_residual_acf.pdf>] [19] [20] (./report.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
@@ -660,75 +660,41 @@ L3 programming layer <2026-01-19>
 
 LaTeX Warning: There were undefined references.
 
-
-Package rerunfilecheck Warning: File `report.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `report.out':
-(rerunfilecheck)             Before: D6EDCD054F715A101EA25A9BCA868CCA;8637
-(rerunfilecheck)             After:  8E490235952E43EE169B1067C686EF9B;7407.
+Package rerunfilecheck Info: File `report.out' has not changed.
+(rerunfilecheck)             Checksum: 8E490235952E43EE169B1067C686EF9B;7407.
  ) 
 Here is how much of TeX's memory you used:
- 13589 strings out of 467525
- 213775 string characters out of 5418983
- 653500 words of memory out of 5000000
- 42207 multiletter control sequences out of 15000+600000
+ 13574 strings out of 467525
+ 213572 string characters out of 5418983
+ 653756 words of memory out of 5000000
+ 42199 multiletter control sequences out of 15000+600000
  641695 words of font info for 93 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,14n,79p,1195b,573s stack positions out of 10000i,1000n,20000p,200000b,200000s
-
-pdfTeX warning (dest): name{appendix.B} has been referenced but does not exist,
- replaced by a fixed one
-
-
-pdfTeX warning (dest): name{subsection.A.5} has been referenced but does not ex
-ist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{subsection.A.4} has been referenced but does not ex
-ist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{subsection.A.3} has been referenced but does not ex
-ist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{subsection.A.2} has been referenced but does not ex
-ist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{subsection.A.1} has been referenced but does not ex
-ist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{appendix.A} has been referenced but does not exist,
- replaced by a fixed one
-
-</usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><
-/usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></
-usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></u
-sr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></us
-r/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/
-local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/lo
-cal/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/loca
-l/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/local/
-texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/te
-xlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texl
-ive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive
-/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/20
-26/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2026/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2026/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2026/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2026/texmf
--dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2026/texmf-d
-ist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2026/texmf-di
-st/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2026/texmf-dis
-t/fonts/type1/public/cm-super/sfrm1095.pfb>
-Output written on report.pdf (20 pages, 577717 bytes).
+</usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
+></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
+</usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
+/usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></
+usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></us
+r/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/
+local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/lo
+cal/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/loca
+l/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/
+texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/te
+xlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texli
+ve/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/
+2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/202
+6/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2026
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2026/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2026/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2026/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2026/texmf-
+dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2026/texmf-d
+ist/fonts/type1/public/cm-super/sfrm1095.pfb>
+Output written on report.pdf (20 pages, 626887 bytes).
 PDF statistics:
- 956 PDF objects out of 1000 (max. 8388607)
- 501 compressed objects within 6 object streams
- 112 named destinations out of 1000 (max. 500000)
- 416 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 959 PDF objects out of 1000 (max. 8388607)
+ 468 compressed objects within 5 object streams
+ 105 named destinations out of 1000 (max. 500000)
+ 360 words of extra memory for PDF output out of 10000 (max. 10000000)
 

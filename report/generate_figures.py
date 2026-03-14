@@ -107,34 +107,74 @@ fig.savefig(FIG_DIR / 'fig1_player_trends.pdf')
 plt.close()
 print("Fig 1 done")
 
-# ── Fig 2: Sentiment distributions ────────────────────────────────────────────
-fig, axes = plt.subplots(1, 3, figsize=(14, 4))
-for ax, stratum in zip(axes, ['popular', 'decline', 'volatile']):
-    sub = panel[panel['stratum'] == stratum]
-    ax.hist(sub['neg_sentiment'], bins=40, alpha=0.7, color='salmon', edgecolor='white')
-    ax.set_title(f'{stratum.title()} Stratum')
-    ax.set_xlabel('Negative Sentiment')
-    ax.set_ylabel('Count')
-fig.suptitle('Distribution of Weekly Negative Sentiment by Stratum', fontsize=14, y=1.02)
+# ── Fig 2: Sentiment distributions (3-panel: overlaid hist + boxplots + scatter)
+strata = ['popular', 'decline', 'volatile']
+colors = {'popular': 'steelblue', 'decline': 'indianred', 'volatile': 'goldenrod'}
+
+# compute next-week player change for scatter
+plot_df = panel.sort_values(['game', 'week']).copy()
+plot_df['player_change_next'] = plot_df.groupby('game')['log_players'].diff().shift(-1)
+plot_df = plot_df.dropna(subset=['player_change_next'])
+
+fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+
+# Left: overlaid density histograms
+for s in strata:
+    sub = plot_df[plot_df['stratum'] == s]['neg_sentiment']
+    axes[0].hist(sub, bins=40, alpha=0.45, density=True, color=colors[s], label=s.capitalize())
+axes[0].set_xlabel('Negative Sentiment Score')
+axes[0].set_ylabel('Density')
+axes[0].set_title('Distribution of Weekly Negative Sentiment')
+axes[0].legend()
+
+# Middle: boxplots by stratum
+data = [plot_df[plot_df['stratum'] == s]['neg_sentiment'].values for s in strata]
+axes[1].boxplot(data, labels=[s.capitalize() for s in strata], showfliers=False)
+axes[1].set_title('Negative Sentiment by Stratum')
+axes[1].set_xlabel('Stratum')
+axes[1].set_ylabel('Negative Sentiment')
+
+# Right: scatter sentiment vs next-week player change
+for s in strata:
+    sub = plot_df[plot_df['stratum'] == s]
+    axes[2].scatter(sub['neg_sentiment'], sub['player_change_next'],
+                    alpha=0.12, s=8, color=colors[s], label=s.capitalize())
+axes[2].set_xlabel('Negative Sentiment')
+axes[2].set_ylabel('Next-week Δ log(players)')
+axes[2].set_title('Sentiment vs Next-week Player Change')
+axes[2].legend()
+
+fig.suptitle('Sentiment Exploratory Analysis', fontsize=15, fontweight='bold', y=1.03)
 fig.tight_layout()
 fig.savefig(FIG_DIR / 'fig2_sentiment_dist.pdf')
 plt.close()
 print("Fig 2 done")
 
-# ── Fig 3: Dual-axis time series for one game ────────────────────────────────
-game_ex = 'Dota 2'
-gd = panel[panel['game'] == game_ex].sort_values('week')
-fig, ax1 = plt.subplots(figsize=(10, 4))
-ax1.plot(gd['week'], gd['log_players'], color='steelblue', linewidth=1)
-ax1.set_ylabel('log(Players)', color='steelblue')
-ax1.tick_params(axis='y', labelcolor='steelblue')
-ax2 = ax1.twinx()
-ax2.plot(gd['week'], gd['neg_sentiment'], color='salmon', linewidth=0.8, alpha=0.8)
-ax2.set_ylabel('Neg. Sentiment', color='salmon')
-ax2.tick_params(axis='y', labelcolor='salmon')
-ax1.set_title(f'{game_ex}: Weekly Player Counts and Negative Sentiment')
-ax1.xaxis.set_major_locator(mdates.YearLocator())
-ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+# ── Fig 3: Dual-axis time series for 3 representative games ──────────────────
+rep_games = ['Counter-Strike 2', 'ARK: Survival Evolved', "No Man's Sky"]
+fig, axes = plt.subplots(3, 1, figsize=(14, 10), sharex=True)
+
+for i, game_ex in enumerate(rep_games):
+    gd = panel[panel['game'] == game_ex].sort_values('week').copy()
+    gd['sentiment_ma'] = gd['neg_sentiment'].rolling(4).mean()
+
+    ax1 = axes[i]
+    ax1.plot(gd['week'], gd['log_players'], color='steelblue', linewidth=1, label='Log Players')
+    ax1.set_ylabel('Log Players', color='steelblue')
+    ax1.tick_params(axis='y', labelcolor='steelblue')
+
+    ax2 = ax1.twinx()
+    ax2.plot(gd['week'], gd['sentiment_ma'], color='indianred', linewidth=0.8,
+             alpha=0.8, label='Neg Sentiment (4wk MA)')
+    ax2.set_ylabel('Negative Sentiment', color='indianred')
+    ax2.tick_params(axis='y', labelcolor='indianred')
+
+    ax1.set_title(game_ex)
+    ax1.xaxis.set_major_locator(mdates.YearLocator())
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+
+axes[-1].set_xlabel('Week')
+fig.suptitle('Player Activity vs Negative Sentiment Over Time', fontsize=16)
 fig.tight_layout()
 fig.savefig(FIG_DIR / 'fig3_timeseries_dota2.pdf')
 plt.close()
