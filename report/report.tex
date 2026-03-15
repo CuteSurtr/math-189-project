@@ -161,26 +161,20 @@ After constructing lag variables and first-differencing, the regression panel ha
 
 Raw review texts undergo the following cleaning steps:
 \begin{enumerate}[nosep]
-    \item Strip URLs and HTML tags.
-    \item Normalize gaming slang and excessive whitespace.
+    \item Strip URLs, HTML tags, and non-ASCII characters.
+    \item Collapse excessive whitespace.
     \item Classify each review using the RoBERTa model.
     \item Fallback: reviews that fail classification are assigned ``neutral'' to maintain row alignment.
 \end{enumerate}
 
 \subsection{RoBERTa Sentiment Classification}
 
-We use the \texttt{cardiffnlp/twitter-roberta-base-sentiment-latest} checkpoint~\cite{barbieri2020}, a RoBERTa model fine-tuned on $\approx 124$M tweets for three-class sentiment classification (negative, neutral, positive).
+We use the \texttt{cardiffnlp/twitter-roberta-base-sentiment} checkpoint~\cite{barbieri2020}, a RoBERTa model fine-tuned on tweets for three-class sentiment classification (negative, neutral, positive).
 
 \medskip\noindent\textbf{Why RoBERTa over VADER?}
 VADER~\cite{hutto2014} is a rule-based, lexicon-driven sentiment analyzer.
-While fast and interpretable, it fails on gaming-specific language because it does not use contextual embeddings.
-RoBERTa's multi-head self-attention evaluates each token in full sentence context, correctly handling:
-\begin{itemize}[nosep]
-    \item ``This game is fire'' $\to$ VADER: negative; RoBERTa: positive.
-    \item ``Absolutely broken update'' $\to$ VADER: moderately negative; RoBERTa: strongly negative.
-    \item ``10/10 would rage-quit again'' $\to$ VADER: negative; RoBERTa: positive (understands irony).
-\end{itemize}
-RoBERTa's contextual embeddings capture the nuanced, informal language of gaming communities far more reliably than lexicon-based approaches.
+While it is fast and interpretable, the model struggles with context and informal language because it does not use contextual embeddings.
+RoBERTa's multi-head self-attention evaluates each token in full sentence context, which makes it better suited to handle negation and informal phrasing in the text found in Steam reviews.
 
 \subsection{Weekly Aggregation and the CLT}
 
