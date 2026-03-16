@@ -169,10 +169,10 @@ Raw review texts undergo the following cleaning steps:
 
 \subsection{RoBERTa Sentiment Classification}
 
-We use the \texttt{cardiffnlp/twitter-roberta-base-sentiment} checkpoint~\cite{barbieri2020}, a RoBERTa model fine-tuned on tweets for three-class sentiment classification (negative, neutral, positive).
+We use \texttt{cardiffnlp/twitter-roberta-base-sentiment}, a RoBERTa model fine-tuned on tweets for three-class sentiment classification (negative, neutral, positive).
 
 \medskip\noindent\textbf{Why RoBERTa over VADER?}
-VADER~\cite{hutto2014} is a rule-based, lexicon-driven sentiment analyzer.
+\\VADER is a rule-based, lexicon-driven sentiment analyzer.
 While it is fast and interpretable, the model struggles with context and informal language because it does not use contextual embeddings.
 RoBERTa's multi-head self-attention evaluates each token in full sentence context, which makes it better suited to handle negation and informal phrasing in the text found in Steam reviews.
 
@@ -241,15 +241,12 @@ No Man's Sky (volatile) exhibits larger fluctuations in both series, with sentim
 
 \subsection{Cross-Correlation Analysis}
 
-Figure~\ref{fig:ccf} shows the mean cross-correlation function (CCF) between negative sentiment and $\log(\text{players})$ averaged across all 15 games at lags $\pm$12 weeks.
-Bars exceeding the dashed 95\% confidence band ($\pm 0.125$) indicate statistically significant mean correlations.
-The mean cross-correlation is near zero at negative lags (future sentiment does not predict past player counts), but becomes increasingly negative at positive lags, falling below the confidence band around lags 5--12.
-This asymmetry is consistent with sentiment leading player count declines: current negative sentiment is associated with lower player counts several weeks later, but not the reverse.
+Figure~\ref{fig:ccf} shows cross-correlation functions (CCF) between negative sentiment and weekly player count changes for three representative games: Counter-Strike~2 (popular), ARK\@: Survival Evolved (declining), and No Man's Sky (volatile), at lags $\pm20$ weeks. Bars exceeding the dashed 95\% confidence band ($\pm 1.96/\sqrt{T}$) indicate statistically significant correlations. Counter-Strike~2 shows correlations near zero across most lags, suggesting little systematic relationship between sentiment and player counts. ARK exhibits weak negative correlations that remain largely within the confidence bounds. No Man's Sky shows larger negative correlations at several positive lags, with some exceeding the confidence bounds, suggesting that sentiment may precede player count declines in more volatile titles. Overall, the patterns are suggestive but not uniform across games.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.58\textwidth]{figures/fig4_crosscorrelation.pdf}
-    \caption{Mean cross-correlation between negative sentiment and $\log(\text{players})$ across all 15 games at lags $\pm$12 weeks. Bars below the $-0.125$ confidence band (positive lags) indicate sentiment leads player count declines.}
+    \includegraphics[width=0.58\textwidth]{figures/fig4_crosscorrelation2.pdf}
+    \caption{Cross-correlation between negative sentiment and $\Delta\log(\text{players})$ for three representative games (Counter-Strike~2, ARK\@: Survival Evolved, No Man's Sky) at lags $\pm20$ weeks. Bars below the $-0.125$ confidence band indicate sentiment preceding player declines.}
     \label{fig:ccf}
 \end{figure}
 
@@ -562,7 +559,7 @@ Figure~\ref{fig:loess} shows that the LOESS curve closely tracks the OLS line, s
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.72\textwidth]{figures/fig8_loess.pdf}
+    \includegraphics[width=0.72\textwidth]{figures/fig8_loess2.pdf}
     \caption{LOESS vs.\ OLS linear fit: lagged negative sentiment $\to$ $\Delta\log(\text{players})$ across all 3{,}630 observations (grey scatter). The LOESS curve (red) closely tracks the OLS line (blue dashed), supporting the linear specification.}
 \label{fig:loess}
 \end{figure}
@@ -602,7 +599,7 @@ MAE  & 0.391 & 0.392 & 0.2\% \\
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.68\textwidth]{figures/fig9_oos_prediction.pdf}
+    \includegraphics[width=0.68\textwidth]{figures/fig9_oos_prediction2.pdf}
     \caption{Out-of-sample predicted vs.\ actual $\Delta\log(\text{players})$ on the test set (2023-06-05 to 2024-09-30). The red dashed line is the 45° reference. RMSE $= 0.509$, only 0.2\% below the na\"ive baseline.}
     \label{fig:oos}
 \end{figure}
